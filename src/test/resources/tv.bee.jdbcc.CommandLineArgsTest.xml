@@ -1,0 +1,133 @@
+<java.util.Arrays_-ArrayList>
+  <a class="object-array-array">
+
+	<object-array>
+	  <string>no args</string>
+	  <string></string>
+      <tv.bee.jdbcc.CommandLineArgs_-BadArgsException><detailMessage><![CDATA[Usage: jdbcc {<Option>=<Value>}* {<SQL script>|-}
+
+	-               interactive mode
+	<SQL script>    file with SQL commands separated by semicolons
+
+Options:
+	-url     connection URL
+	-user    username
+	-passwd  password
+	-driver  driver class name
+	-config  read settings from file
+	-recover report errors and continue (default in interactive mode)
+	-strict  report the first error and exit (default in non-interactive mode)
+
+Examples:
+	jdbcc -
+	    read settings from $HOME/.jdbcc and enter interactive mode
+
+	jdbcc script.sql
+	    read settings from $HOME/.jdbcc and execute SQL from file
+
+	jdbcc -s settings.props script.sql
+	    read settings from settings.props and execute SQL from file
+
+	jdbcc -c jdbc:h2:test -u sa -p sa -d org.h2.Driver -e script.sql
+	    use connection settings from comand line, don't stop on errors and execute script.sql]]></detailMessage>
+	  </tv.bee.jdbcc.CommandLineArgs_-BadArgsException>
+      <null/>
+   </object-array>
+
+	  <object-array>
+		  <string>file not found</string>
+	      <string>/some/nonexisting/path</string>
+		  <tv.bee.jdbcc.CommandLineArgs_-BadArgsException>
+			  <detailMessage><![CDATA[File not found: "/some/nonexisting/path"]]></detailMessage>
+		  </tv.bee.jdbcc.CommandLineArgs_-BadArgsException>
+		  <null/>
+	  </object-array>
+
+	  <object-array>
+		  <string>file found</string>
+		  <string>testdata/test.sql</string>
+		  <null/>
+		  <null/>
+	  </object-array>
+
+	  <object-array>
+		  <string>existing config file</string>
+		  <string>-s testdata/test.properties -</string>
+		  <null/>
+		  <map>
+			  <entry>
+				  <string>driverClassName</string>
+				  <string>org.h2.Driver</string>
+			  </entry>
+			  <entry>
+				  <string>connectionString</string>
+				  <string>jdbc:h2:test</string>
+			  </entry>
+			  <entry>
+				  <string>user</string>
+				  <string>sa</string>
+			  </entry><entry>
+				  <string>password</string>
+				  <string></string>
+			  </entry>
+			  <entry>
+				  <string>driverPath</string>
+				  <string>h2.jar</string>
+			  </entry>
+		  </map>
+	  </object-array>
+
+	  <object-array>
+				<string>non existing config file</string>
+				<string>-s /non/existing/dir/test.properties -</string>
+				<tv.bee.jdbcc.CommandLineArgs_-BadArgsException>
+			  		<detailMessage><![CDATA[File not found: "/non/existing/dir/test.properties"]]></detailMessage>
+		  		</tv.bee.jdbcc.CommandLineArgs_-BadArgsException>
+				<null/>
+	  </object-array>
+
+	  <object-array>
+			  <string>command line config</string>
+				<string>-c 1 -d 2 -u 3 -p 4 -</string>
+				<null/>
+				<map>
+					<entry>
+						<string>connectionString</string>
+						<string>1</string>
+					</entry>
+					<entry>
+						<string>driverClassName</string>
+						<string>2</string>
+					</entry>
+					<entry>
+						<string>user</string>
+						<string>3</string>
+					</entry>
+					<entry>
+						<string>password</string>
+						<string>4</string>
+					</entry>
+				</map>
+		</object-array>
+
+
+	  <object-array>
+		  <string>extra arg</string>
+		  <string>file1.sql file2.sql</string>
+		  <tv.bee.jdbcc.CommandLineArgs_-BadArgsException>
+			  <detailMessage><![CDATA[A single file name or '-' for interactive input is expected, got: "file1.sql file2.sql"]]></detailMessage>
+		  </tv.bee.jdbcc.CommandLineArgs_-BadArgsException>
+		  <null/>
+	  </object-array>
+
+	  <object-array>
+		  <string>bad option</string>
+		  <string>-foo</string>
+		  <tv.bee.jdbcc.CommandLineArgs_-BadArgsException>
+			  <detailMessage><![CDATA[Unreckognized option: "-foo"]]></detailMessage>
+		  </tv.bee.jdbcc.CommandLineArgs_-BadArgsException>
+		  <null/>
+	  </object-array>
+
+  </a>
+</java.util.Arrays_-ArrayList>
