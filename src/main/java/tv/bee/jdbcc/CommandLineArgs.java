@@ -126,36 +126,36 @@ public class CommandLineArgs implements ParsedCommandLine {
     }
 
     private void parseAndRemoveOption(String arg, Iterator<String> i) throws BadArgsException {
-        if (arg.equals("-e")) {
+        if (arg.equals("-recover")) {
             isStopOnError = false;
             i.remove();
         }
-        else if (arg.equals("-E")) {
+        else if (arg.equals("-strict")) {
             isStopOnError = true;
             i.remove();
         }
-        else if (arg.equals("-s")) {
+        else if (arg.equals("-config")) {
             i.remove();
             String fileName = i.next();
             readConfigProperties(true, fileName);
             i.remove();            
         }
-        else if (arg.equals("-c")) {
+        else if (arg.equals("-url")) {
             i.remove();
             connectionString = i.next();
             i.remove();
         }
-        else if (arg.equals("-d")) {
+        else if (arg.equals("-driver")) {
             i.remove();
             driverClassName = i.next();
             i.remove();
         }
-        else if (arg.equals("-u")) {
+        else if (arg.equals("-user")) {
             i.remove();
             user = i.next();
             i.remove();
         }
-        else if (arg.equals("-p")) {
+        else if (arg.equals("-passwd")) {
             i.remove();
             password = i.next();
             i.remove();
