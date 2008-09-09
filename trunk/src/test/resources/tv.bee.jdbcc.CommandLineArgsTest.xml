@@ -1,39 +1,6 @@
 <java.util.Arrays_-ArrayList>
   <a class="object-array-array">
 
-	<object-array>
-	  <string>no args</string>
-	  <string></string>
-      <tv.bee.jdbcc.CommandLineArgs_-BadArgsException><detailMessage><![CDATA[Usage: jdbcc {<Option>=<Value>}* {<SQL script>|-}
-
-	-               interactive mode
-	<SQL script>    file with SQL commands separated by semicolons
-
-Options:
-	-url     connection URL
-	-user    username
-	-passwd  password
-	-driver  driver class name
-	-config  read settings from file
-	-recover report errors and continue (default in interactive mode)
-	-strict  report the first error and exit (default in non-interactive mode)
-
-Examples:
-	jdbcc -
-	    read settings from $HOME/.jdbcc and enter interactive mode
-
-	jdbcc script.sql
-	    read settings from $HOME/.jdbcc and execute SQL from file
-
-	jdbcc -s settings.props script.sql
-	    read settings from settings.props and execute SQL from file
-
-	jdbcc -c jdbc:h2:test -u sa -p sa -d org.h2.Driver -e script.sql
-	    use connection settings from comand line, don't stop on errors and execute script.sql]]></detailMessage>
-	  </tv.bee.jdbcc.CommandLineArgs_-BadArgsException>
-      <null/>
-   </object-array>
-
 	  <object-array>
 		  <string>file not found</string>
 	      <string>/some/nonexisting/path</string>
@@ -52,7 +19,7 @@ Examples:
 
 	  <object-array>
 		  <string>existing config file</string>
-		  <string>-s testdata/test.properties -</string>
+		  <string>-config testdata/test.jdbcc -</string>
 		  <null/>
 		  <map>
 			  <entry>
@@ -79,7 +46,7 @@ Examples:
 
 	  <object-array>
 				<string>non existing config file</string>
-				<string>-s /non/existing/dir/test.properties -</string>
+				<string>-config /non/existing/dir/test.properties -</string>
 				<tv.bee.jdbcc.CommandLineArgs_-BadArgsException>
 			  		<detailMessage><![CDATA[File not found: "/non/existing/dir/test.properties"]]></detailMessage>
 		  		</tv.bee.jdbcc.CommandLineArgs_-BadArgsException>
@@ -88,7 +55,7 @@ Examples:
 
 	  <object-array>
 			  <string>command line config</string>
-				<string>-c 1 -d 2 -u 3 -p 4 -</string>
+				<string>-url 1 -driver 2 -user 3 -passwd 4 -</string>
 				<null/>
 				<map>
 					<entry>
