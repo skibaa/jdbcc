@@ -36,12 +36,14 @@ public class CommandLineArgs implements ParsedCommandLine {
         String getName () {return name;}
     }
 
-    public static class BadArgsException extends Exception {
-        public enum ErrorType {
-            EXTRA_ARGS, BAD_ARG, FILE_NOT_FOUND, READ_ERROR, PROPERTY_NOT_FOUND, NO_ARGS
+    private enum ErrorType {
+         EXTRA_ARGS, BAD_ARG, FILE_NOT_FOUND, READ_ERROR, PROPERTY_NOT_FOUND, HELP, NO_ARGS
+    }
 
-        }
-        static ResourceBundle myResources = ResourceBundle.getBundle("BadArgsErrorTypes");
+    static ResourceBundle myResources = ResourceBundle.getBundle("BadArgsErrorTypes");
+
+    public static class BadArgsException extends Exception {
+
 
         public BadArgsException (ErrorType errorType, Object ... args) {
             super (String.format(myResources.getString(errorType.toString()), args));
@@ -65,32 +67,29 @@ public class CommandLineArgs implements ParsedCommandLine {
     private void parseArgs(String[] args) throws BadArgsException {
         this.args = new LinkedList<String>(Arrays.asList(args));
 
-        if (this.args.isEmpty()) {
-            throw new BadArgsException(BadArgsException.ErrorType.NO_ARGS);
-        }
 
-        readConfigProperties(false, System.getProperty("user.home")+"/.jdbcc");
+            readConfigProperties(false, System.getProperty("user.home")+"/.jdbcc");
 
-        parseOptions();
+            parseOptions();
 
-        parseInputStreamArgs();
+            parseInputStreamArgs();
 
         if (!this.args.isEmpty())
-            throw new BadArgsException(BadArgsException.ErrorType.EXTRA_ARGS, StringUtils.join(args, ' '));
+            throw new BadArgsException(ErrorType.EXTRA_ARGS, StringUtils.join(args, ' '));
 
     }
 
     private void parseInputStreamArgs() throws BadArgsException {
-        if (args.size() == 0)
-            throw new BadArgsException(BadArgsException.ErrorType.NO_ARGS);
+        if (args.size() == 0) {
+            handleNoArgs(true);
+            return;
+        }
         if (args.size() > 1)
-            throw new BadArgsException(BadArgsException.ErrorType.EXTRA_ARGS, StringUtils.join(args, ' '));
+            throw new BadArgsException(ErrorType.EXTRA_ARGS, StringUtils.join(args, ' '));
         String arg = args.remove(0);
 
         if (arg.equals("-")) {
-            if (isStopOnError == null)
-                isStopOnError = false;
-            scriptStream = new InputStreamReader(System.in);
+            handleNoArgs(false);
             return;
         }
 
@@ -100,9 +99,23 @@ public class CommandLineArgs implements ParsedCommandLine {
         try {
             scriptStream = new FileReader(arg);
         } catch (FileNotFoundException e) {
-            throw new BadArgsException(BadArgsException.ErrorType.FILE_NOT_FOUND, arg);
+            throw new BadArgsException(ErrorType.FILE_NOT_FOUND, arg);
         }
     }
+
+    private void handleNoArgs(boolean printWarning) {
+        if (printWarning) {
+            String msg = myResources.getString(ErrorType.NO_ARGS.toString());
+            //FIXME: cannot be tested. Refactor this class to print messages on given stream instead of
+            //hard-coded System.err
+            System.err.println(msg);
+        }
+        if (isStopOnError == null)
+                isStopOnError = false;
+        scriptStream = new InputStreamReader(System.in);
+        return;
+    }
+
 
     private void parseOptions() throws BadArgsException {
         int newSize=args.size();
@@ -160,8 +173,11 @@ public class CommandLineArgs implements ParsedCommandLine {
             password = i.next();
             i.remove();
         }
+        else if (arg.equals("-help")) {
+            throw new BadArgsException(ErrorType.HELP);
+        }
         else {
-            throw new BadArgsException(BadArgsException.ErrorType.BAD_ARG, arg);
+            throw new BadArgsException(ErrorType.BAD_ARG, arg);
         }
     }
 
@@ -174,13 +190,13 @@ public class CommandLineArgs implements ParsedCommandLine {
                 return;
             fis = new FileInputStream(file);
         } catch (IOException e) {
-            throw new BadArgsException(BadArgsException.ErrorType.FILE_NOT_FOUND, fileName);
+            throw new BadArgsException(ErrorType.FILE_NOT_FOUND, fileName);
         }
         try {
             props.load(fis);
             fis.close();
         } catch (IOException e) {
-            throw new BadArgsException(BadArgsException.ErrorType.READ_ERROR, fileName);
+            throw new BadArgsException(ErrorType.READ_ERROR, fileName);
         }
 
         this.connectionString = readConfigProperty(props, fileName, ConfigProperties.CONNECTION_STRING);
@@ -193,7 +209,7 @@ public class CommandLineArgs implements ParsedCommandLine {
     private String readConfigProperty(Properties props, String fileName, ConfigProperties configProperty) throws BadArgsException {
         String res = props.getProperty(configProperty.getName());
         if (res == null) {
-            throw new BadArgsException(BadArgsException.ErrorType.PROPERTY_NOT_FOUND, fileName, configProperty.getName());
+            throw new BadArgsException(ErrorType.PROPERTY_NOT_FOUND, fileName, configProperty.getName());
         }
         return res;
     }
