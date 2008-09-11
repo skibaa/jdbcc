@@ -124,7 +124,7 @@ public class CommandLineArgsTest {
             content.append(line);
             line = br.readLine();
         }
-        assertThat(content.toString(), containsString(expectedContentSubstr));
+        assertThat(testName, content.toString(), containsString(expectedContentSubstr));
     }
 
 }
