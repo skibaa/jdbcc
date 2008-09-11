@@ -16,7 +16,7 @@ import java.lang.reflect.Method;
  */
 
 public class Main {
-    private InputStreamReader scriptReader;
+    private Reader scriptReader;
     private String driverClassName;
     private String connectionString;
     private Connection conn;
@@ -24,6 +24,7 @@ public class Main {
     private String password;
     private boolean stopOnError;
     private String driverPath;
+    private PrintWriter stdout;
 
     public Main(String scriptFileName, String driverClassName, String connectionString, String user, String password) {
 
@@ -80,6 +81,7 @@ public class Main {
             if (lnr != null) {
                 lnr.close();
             }
+            conn.close();
         }
     }
 
@@ -113,6 +115,9 @@ public class Main {
         if (user != null) {
             this.conn = DriverManager.getConnection(connectionString, user, password);
         }
+        else {
+            this.conn = DriverManager.getConnection(connectionString);
+        }
     }
 
     private void executeQuery(String s, int lineNumber) throws SQLException {
@@ -123,30 +128,30 @@ public class Main {
                 ResultSet rs = stat.getResultSet();
                 ResultSetMetaData rsMd = rs.getMetaData();
 
-                System.out.print("|");
+                stdout.print("|");
                 for (int i=1; i<=rsMd.getColumnCount(); i++) {
-                    System.out.print(" ");
-                    System.out.print(rsMd.getColumnName(i));
-                    System.out.print(" |");
+                    stdout.print(" ");
+                    stdout.print(rsMd.getColumnName(i));
+                    stdout.print(" |");
                 }
-                System.out.println("");
+                stdout.println("");
 
                 int count=0;
                 rs.next();
                 while (!rs.isAfterLast()) {
                     count ++;
-                    System.out.print("|");
+                    stdout.print("|");
                     for (int i=1; i<=rsMd.getColumnCount(); i++) {
-                        System.out.print(" ");
-                        System.out.print(rs.getObject(i));
-                        System.out.print(" |");
+                        stdout.print(" ");
+                        stdout.print(rs.getObject(i));
+                        stdout.print(" |");
                     }
-                    System.out.println("");
+                    stdout.println("");
                     rs.next();
                 }
-                System.out.println("Query OK, "+count+" row(s) returned.");
+                stdout.println("Query OK, "+count+" row(s) returned.");
             } else {
-                System.out.println(String.format("Query OK, %d records updated.", stat.getUpdateCount()));
+                stdout.println(String.format("Query OK, %d records updated.", stat.getUpdateCount()));
             }
         } catch (SQLException e) {
             System.err.println("Error " + "near line "+lineNumber+" in query "+s);
@@ -156,5 +161,12 @@ public class Main {
             else
                 System.err.println(e.getMessage());
         }
+
+    }
+
+    public void setStdout(PrintWriter stdout) {
+        if (stdout != null)
+            this.stdout = stdout;
+        stdout = new PrintWriter(System.out);
     }
 }

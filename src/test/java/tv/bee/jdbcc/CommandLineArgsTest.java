@@ -115,7 +115,7 @@ public class CommandLineArgsTest {
         if (expectedContentSubstr == null || expectedContentSubstr.length() == 0)
             return;
 
-        InputStreamReader isr = cla.getScriptStream();
+        Reader isr = cla.getScriptStream();
         BufferedReader br = new BufferedReader(isr);
         StringBuffer content = new StringBuffer();
 

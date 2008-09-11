@@ -5,7 +5,7 @@
 		  <string>file not found</string>
 	      <string>/some/nonexisting/path</string>
 		  <tv.bee.jdbcc.CommandLineArgs_-BadArgsException>
-			  <detailMessage><![CDATA[File not found: "/some/nonexisting/path"]]></detailMessage>
+			  <detailMessage>File not found: "/some/nonexisting/path"</detailMessage>
 		  </tv.bee.jdbcc.CommandLineArgs_-BadArgsException>
 		  <null/>
 		  <null/>
@@ -23,7 +23,7 @@
 	  <string>gzip file not found</string>
 				<string>-unzip /some/nonexisting/path</string>
 				<tv.bee.jdbcc.CommandLineArgs_-BadArgsException>
-					<detailMessage><![CDATA[File not found: "/some/nonexisting/path"]]></detailMessage>
+					<detailMessage>File not found: "/some/nonexisting/path"</detailMessage>
 				</tv.bee.jdbcc.CommandLineArgs_-BadArgsException>
 				<null/>
 		  <null/>
@@ -57,10 +57,6 @@
 			  </entry><entry>
 				  <string>password</string>
 				  <string></string>
-			  </entry>
-			  <entry>
-				  <string>driverPath</string>
-				  <string>h2.jar</string>
 			  </entry>
 		  </map>
 		  <null/>

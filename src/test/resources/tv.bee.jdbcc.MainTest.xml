@@ -1,0 +1,11 @@
+<java.util.Arrays_-ArrayList>
+  <a class="object-array-array">
+
+	  <object-array>
+		  <string>simple sql</string>
+		  <string>create table if not exists testTable(testField number);</string>
+		  <string>OK</string>
+	  </object-array>
+
+  </a>
+</java.util.Arrays_-ArrayList>

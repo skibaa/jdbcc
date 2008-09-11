@@ -20,9 +20,9 @@ public class CommandLineArgs implements ParsedCommandLine {
     private Boolean stopOnError;
     private String driverPath;
     private boolean unzip = false;
-    private InputStream stdin;
-    private PrintStream stdout;
-    private PrintStream stderr;
+    private Reader stdin;
+    private PrintWriter stdout;
+    private PrintWriter stderr;
 
     public String getDriverPath() {
         return driverPath;
@@ -61,19 +61,19 @@ public class CommandLineArgs implements ParsedCommandLine {
         }
     }
 
-    private InputStreamReader scriptStream;
+    private Reader scriptStream;
     private List<String> args;
 
     public CommandLineArgs(String ... args) throws BadArgsException {
         this(null, null, null, args);
     }
 
-    public CommandLineArgs(InputStream stdin, PrintStream stdout, PrintStream stderr,
+    public CommandLineArgs(Reader stdin, PrintWriter stdout, PrintWriter stderr,
                            String ... args) throws BadArgsException {
 
-        this.stdin = stdin==null?System.in:stdin;
-        this.stdout = stdout==null?System.out:stdout;
-        this.stderr = stderr==null?System.err:stderr;
+        this.stdin = stdin==null?new InputStreamReader(System.in):stdin;
+        this.stdout = stdout==null?new PrintWriter(System.out):stdout;
+        this.stderr = stderr==null?new PrintWriter(System.err):stderr;
 
         this.args = new LinkedList<String>(Arrays.asList(args));
 
@@ -124,7 +124,7 @@ public class CommandLineArgs implements ParsedCommandLine {
         }
         if (stopOnError == null)
                 stopOnError = false;
-        scriptStream = new InputStreamReader(stdin);
+        scriptStream = stdin;
         return;
     }
 
@@ -215,22 +215,25 @@ public class CommandLineArgs implements ParsedCommandLine {
             throw new BadArgsException(ErrorType.READ_ERROR, fileName);
         }
 
-        this.connectionString = readConfigProperty(props, fileName, ConfigProperties.CONNECTION_STRING);
-        this.driverClassName = readConfigProperty(props, fileName, ConfigProperties.DRIVER_CLASS);
-        this.driverPath = readConfigProperty(props, fileName, ConfigProperties.DRIVER_PATH);
-        this.user = readConfigProperty(props, fileName, ConfigProperties.USER);
-        this.password = readConfigProperty(props, fileName, ConfigProperties.PASSWORD);
+        this.connectionString = readConfigProperty(props, fileName, ConfigProperties.CONNECTION_STRING, true);
+        this.driverClassName = readConfigProperty(props, fileName, ConfigProperties.DRIVER_CLASS, true);
+        this.driverPath = readConfigProperty(props, fileName, ConfigProperties.DRIVER_PATH, false);
+        this.user = readConfigProperty(props, fileName, ConfigProperties.USER, false);
+        this.password = readConfigProperty(props, fileName, ConfigProperties.PASSWORD, false);
     }
 
-    private String readConfigProperty(Properties props, String fileName, ConfigProperties configProperty) throws BadArgsException {
+    private String readConfigProperty(Properties props, String fileName, ConfigProperties configProperty,
+                                      boolean mandatory) throws BadArgsException {
         String res = props.getProperty(configProperty.getName());
+        if (!mandatory)
+            return res;
         if (res == null) {
             throw new BadArgsException(ErrorType.PROPERTY_NOT_FOUND, fileName, configProperty.getName());
         }
         return res;
     }
 
-    public InputStreamReader getScriptStream() {
+    public Reader getScriptStream() {
         return scriptStream;
     }
 
