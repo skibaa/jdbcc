@@ -64,34 +64,27 @@ public class CommandLineArgs implements ParsedCommandLine {
     private InputStreamReader scriptStream;
     private List<String> args;
 
+    public CommandLineArgs(String ... args) throws BadArgsException {
+        this(null, null, null, args);
+    }
+
     public CommandLineArgs(InputStream stdin, PrintStream stdout, PrintStream stderr,
                            String ... args) throws BadArgsException {
-        this.stdin = stdin;
-        this.stdout = stdout;
-        this.stderr = stderr;
-        parseArgs(args);
-    }
 
-    public CommandLineArgs(String ... args) throws BadArgsException {
-        this.stdin = System.in;
-        this.stdout = System.out;
-        this.stderr = System.err;
-        parseArgs(args);
-    }
+        this.stdin = stdin==null?System.in:stdin;
+        this.stdout = stdout==null?System.out:stdout;
+        this.stderr = stderr==null?System.err:stderr;
 
-    private void parseArgs(String[] args) throws BadArgsException {
         this.args = new LinkedList<String>(Arrays.asList(args));
 
+        readConfigProperties(false, System.getProperty("user.home")+"/.jdbcc");
 
-            readConfigProperties(false, System.getProperty("user.home")+"/.jdbcc");
+        parseOptions();
 
-            parseOptions();
-
-            parseInputStreamArgs();
+        parseInputStreamArgs();
 
         if (!this.args.isEmpty())
             throw new BadArgsException(ErrorType.EXTRA_ARGS, StringUtils.join(args, ' '));
-
     }
 
     private void parseInputStreamArgs() throws BadArgsException {
