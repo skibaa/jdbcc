@@ -20,5 +20,5 @@ public interface ParsedCommandLine {
 
     String getPassword();
 
-    boolean isStopOnError();
+    boolean getStopOnError();
 }

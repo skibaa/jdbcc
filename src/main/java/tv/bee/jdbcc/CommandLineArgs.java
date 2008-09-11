@@ -4,6 +4,7 @@ import org.apache.commons.lang.StringUtils;
 
 import java.io.*;
 import java.util.*;
+import java.util.zip.GZIPInputStream;
 
 /* 
  * Command line parsing for jdbcc application
@@ -16,9 +17,9 @@ public class CommandLineArgs implements ParsedCommandLine {
     String driverClassName;
     String password;
     String user;
-    boolean stopOnError;
-    private Boolean isStopOnError;
+    private Boolean stopOnError;
     private String driverPath;
+    private boolean unzip = false;
 
     public String getDriverPath() {
         return driverPath;
@@ -37,7 +38,7 @@ public class CommandLineArgs implements ParsedCommandLine {
     }
 
     private enum ErrorType {
-         EXTRA_ARGS, BAD_ARG, FILE_NOT_FOUND, READ_ERROR, PROPERTY_NOT_FOUND, HELP, NO_ARGS
+         EXTRA_ARGS, BAD_ARG, FILE_NOT_FOUND, READ_ERROR, PROPERTY_NOT_FOUND, HELP, IO_ERROR, NO_ARGS
     }
 
     static ResourceBundle myResources = ResourceBundle.getBundle("BadArgsErrorTypes");
@@ -93,13 +94,19 @@ public class CommandLineArgs implements ParsedCommandLine {
             return;
         }
 
-        if (isStopOnError == null)
-                isStopOnError = true;
+        if (stopOnError == null)
+                stopOnError = true;
 
         try {
-            scriptStream = new FileReader(arg);
+            InputStream stream = new FileInputStream(arg);
+            if (unzip) {
+                stream = new GZIPInputStream(stream);
+            }
+            scriptStream = new InputStreamReader(stream);
         } catch (FileNotFoundException e) {
             throw new BadArgsException(ErrorType.FILE_NOT_FOUND, arg);
+        } catch (IOException e) {
+            throw new BadArgsException(ErrorType.IO_ERROR, arg);
         }
     }
 
@@ -110,8 +117,8 @@ public class CommandLineArgs implements ParsedCommandLine {
             //hard-coded System.err
             System.err.println(msg);
         }
-        if (isStopOnError == null)
-                isStopOnError = false;
+        if (stopOnError == null)
+                stopOnError = false;
         scriptStream = new InputStreamReader(System.in);
         return;
     }
@@ -140,11 +147,11 @@ public class CommandLineArgs implements ParsedCommandLine {
 
     private void parseAndRemoveOption(String arg, Iterator<String> i) throws BadArgsException {
         if (arg.equals("-recover")) {
-            isStopOnError = false;
+            stopOnError = false;
             i.remove();
         }
         else if (arg.equals("-strict")) {
-            isStopOnError = true;
+            stopOnError = true;
             i.remove();
         }
         else if (arg.equals("-config")) {
@@ -172,6 +179,10 @@ public class CommandLineArgs implements ParsedCommandLine {
             i.remove();
             password = i.next();
             i.remove();
+        }
+        else if (arg.equals("-unzip")) {
+            i.remove();
+            this.unzip = true;
         }
         else if (arg.equals("-help")) {
             throw new BadArgsException(ErrorType.HELP);
@@ -234,7 +245,7 @@ public class CommandLineArgs implements ParsedCommandLine {
         return password;
     }
 
-    public boolean isStopOnError() {
-        return this.isStopOnError;
+    public boolean getStopOnError() {
+        return this.stopOnError;
     }
 }

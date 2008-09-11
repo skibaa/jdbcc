@@ -3,6 +3,7 @@ package tv.bee.jdbcc;
 import org.junit.Test;
 import org.junit.Before;
 import org.junit.Assert;
+import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.junit.Assume.assumeNotNull;
 import static org.junit.Assert.assertThat;
 import org.junit.runners.Parameterized;
@@ -38,6 +39,7 @@ public class CommandLineArgsTest {
     //actual data
     private CommandLineArgs.BadArgsException actualException;
     private String testName;
+    private String expectedContentSubstr;
 
 
     @Parameterized.Parameters
@@ -54,8 +56,9 @@ public class CommandLineArgsTest {
     }
 
     public CommandLineArgsTest (String testName, String args, CommandLineArgs.BadArgsException expectedException,
-                                Map<String, Object> expectedFields) {
+                                Map<String, Object> expectedFields, String expectedContentSubstr) {
         this.testName = testName;
+        this.expectedContentSubstr = expectedContentSubstr;
         this.args = splitArgs(args);
         this.expectedException = expectedException;
         this.expectedFields = expectedFields;
@@ -105,6 +108,23 @@ public class CommandLineArgsTest {
                 Assert.fail(testName+" - no such field: "+fieldName);
             }
         }
+    }
+
+    @Test
+    public void testContent () throws IOException {
+        if (expectedContentSubstr == null || expectedContentSubstr.length() == 0)
+            return;
+
+        InputStreamReader isr = cla.getScriptStream();
+        BufferedReader br = new BufferedReader(isr);
+        StringBuffer content = new StringBuffer();
+
+        String line = br.readLine();
+        while (line != null) {
+            content.append(line);
+            line = br.readLine();
+        }
+        assertThat(content.toString(), containsString(expectedContentSubstr));
     }
 
 }

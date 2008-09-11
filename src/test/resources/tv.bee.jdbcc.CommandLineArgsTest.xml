@@ -8,6 +8,7 @@
 			  <detailMessage><![CDATA[File not found: "/some/nonexisting/path"]]></detailMessage>
 		  </tv.bee.jdbcc.CommandLineArgs_-BadArgsException>
 		  <null/>
+		  <null/>
 	  </object-array>
 
 	  <object-array>
@@ -15,6 +16,26 @@
 		  <string>testdata/test.sql</string>
 		  <null/>
 		  <null/>
+		  <null/>
+	  </object-array>
+
+	  <object-array>
+	  <string>gzip file not found</string>
+				<string>-unzip /some/nonexisting/path</string>
+				<tv.bee.jdbcc.CommandLineArgs_-BadArgsException>
+					<detailMessage><![CDATA[File not found: "/some/nonexisting/path"]]></detailMessage>
+				</tv.bee.jdbcc.CommandLineArgs_-BadArgsException>
+				<null/>
+		  <null/>
+			</object-array>
+
+
+	  <object-array>
+		  <string>gzip file found</string>
+		  <string>-unzip testdata/test.sql.gz</string>
+		  <null/>
+		  <null/>
+		  <string>from</string>
 	  </object-array>
 
 	  <object-array>
@@ -42,6 +63,7 @@
 				  <string>h2.jar</string>
 			  </entry>
 		  </map>
+		  <null/>
 	  </object-array>
 
 	  <object-array>
@@ -51,6 +73,7 @@
 			  		<detailMessage><![CDATA[File not found: "/non/existing/dir/test.properties"]]></detailMessage>
 		  		</tv.bee.jdbcc.CommandLineArgs_-BadArgsException>
 				<null/>
+		  <null/>
 	  </object-array>
 
 	  <object-array>
@@ -75,6 +98,7 @@
 						<string>4</string>
 					</entry>
 				</map>
+		  <null/>
 		</object-array>
 
 
@@ -85,6 +109,7 @@
 			  <detailMessage><![CDATA[A single file name or '-' for interactive input is expected, got: "file1.sql file2.sql"]]></detailMessage>
 		  </tv.bee.jdbcc.CommandLineArgs_-BadArgsException>
 		  <null/>
+		  <null/>
 	  </object-array>
 
 	  <object-array>
@@ -93,6 +118,7 @@
 		  <tv.bee.jdbcc.CommandLineArgs_-BadArgsException>
 			  <detailMessage><![CDATA[Unreckognized option: "-foo"]]></detailMessage>
 		  </tv.bee.jdbcc.CommandLineArgs_-BadArgsException>
+		  <null/>
 		  <null/>
 	  </object-array>
 
