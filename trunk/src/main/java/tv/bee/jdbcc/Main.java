@@ -35,7 +35,7 @@ public class Main {
         this.connectionString = cla.getConnectionString();
         this.user = cla.getUser();
         this.password = cla.getPassword();
-        this.stopOnError = cla.isStopOnError();
+        this.stopOnError = cla.getStopOnError();
         this.driverPath = cla.getDriverPath();
     }
 
