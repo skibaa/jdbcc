@@ -1,6 +1,7 @@
 package tv.bee.jdbcc;
 
 import java.io.InputStreamReader;
+import java.io.Reader;
 
 /**
  * Created by IntelliJ IDEA.
@@ -10,7 +11,7 @@ import java.io.InputStreamReader;
  * To change this template use File | Settings | File Templates.
  */
 public interface ParsedCommandLine {
-    InputStreamReader getScriptStream();
+    Reader getScriptStream();
 
     String getDriverClassName();
 

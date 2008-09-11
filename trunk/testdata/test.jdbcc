@@ -2,4 +2,3 @@ connection_string=jdbc:h2:test
 driver_class=org.h2.Driver
 user=sa
 password=
-driver_path=h2.jar
