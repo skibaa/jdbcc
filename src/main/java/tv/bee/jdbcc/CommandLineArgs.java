@@ -20,6 +20,9 @@ public class CommandLineArgs implements ParsedCommandLine {
     private Boolean stopOnError;
     private String driverPath;
     private boolean unzip = false;
+    private InputStream stdin;
+    private PrintStream stdout;
+    private PrintStream stderr;
 
     public String getDriverPath() {
         return driverPath;
@@ -61,7 +64,18 @@ public class CommandLineArgs implements ParsedCommandLine {
     private InputStreamReader scriptStream;
     private List<String> args;
 
-    public CommandLineArgs(String [] args) throws BadArgsException {
+    public CommandLineArgs(InputStream stdin, PrintStream stdout, PrintStream stderr,
+                           String ... args) throws BadArgsException {
+        this.stdin = stdin;
+        this.stdout = stdout;
+        this.stderr = stderr;
+        parseArgs(args);
+    }
+
+    public CommandLineArgs(String ... args) throws BadArgsException {
+        this.stdin = System.in;
+        this.stdout = System.out;
+        this.stderr = System.err;
         parseArgs(args);
     }
 
@@ -113,13 +127,11 @@ public class CommandLineArgs implements ParsedCommandLine {
     private void handleNoArgs(boolean printWarning) {
         if (printWarning) {
             String msg = myResources.getString(ErrorType.NO_ARGS.toString());
-            //FIXME: cannot be tested. Refactor this class to print messages on given stream instead of
-            //hard-coded System.err
-            System.err.println(msg);
+            stderr.println(msg);
         }
         if (stopOnError == null)
                 stopOnError = false;
-        scriptStream = new InputStreamReader(System.in);
+        scriptStream = new InputStreamReader(stdin);
         return;
     }
 
