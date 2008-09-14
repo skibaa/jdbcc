@@ -32,6 +32,7 @@ public class CommandLineArgsTest {
     //expected test data
     private Map<String, Object> expectedFields;
     private CommandLineArgs.BadArgsException expectedException;
+    private String expectedContentSubstr;
 
     //test subject
     CommandLineArgs cla;
@@ -39,8 +40,7 @@ public class CommandLineArgsTest {
     //actual data
     private CommandLineArgs.BadArgsException actualException;
     private String testName;
-    private String expectedContentSubstr;
-
+    private StringWriter actualStderr=new StringWriter();
 
     @Parameterized.Parameters
     public static Collection data() {
@@ -75,7 +75,7 @@ public class CommandLineArgsTest {
     public void setup () {
         //FIXME: this split is simplistic, should handle backslashes and quotes
         try {
-            cla = new CommandLineArgs(args);
+            cla = new CommandLineArgs(null, null, new PrintWriter(actualStderr), args);
         } catch (CommandLineArgs.BadArgsException e) {
             this.actualException = e;
         }
@@ -115,7 +115,7 @@ public class CommandLineArgsTest {
         if (expectedContentSubstr == null || expectedContentSubstr.length() == 0)
             return;
 
-        Reader isr = cla.getScriptStream();
+        Reader isr = cla.getScriptReaders().iterator().next();
         BufferedReader br = new BufferedReader(isr);
         StringBuffer content = new StringBuffer();
 

@@ -1,0 +1,1 @@
+INSERT INTO CATEGORY(id) values (10)

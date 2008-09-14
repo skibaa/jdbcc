@@ -24,6 +24,8 @@ public class CommandLineArgs {
     private PrintWriter stdout;
     private PrintWriter stderr;
     private List<String> delimiters = new ArrayList<String>();
+    private List<Reader> scriptReaders;
+    private List<String> args;
 
     public String getDriverPath() {
         return driverPath;
@@ -37,6 +39,10 @@ public class CommandLineArgs {
         if (delimiters.size() == 0)
             delimiters.add(";");
         return delimiters;
+    }
+
+    public PrintWriter getStderr() {
+        return stderr;
     }
 
     enum ConfigProperties {
@@ -73,9 +79,6 @@ public class CommandLineArgs {
         }
     }
 
-    private Reader scriptStream;
-    private List<String> args;
-
     public CommandLineArgs(String ... args) throws BadArgsException {
         this(null, null, null, args);
     }
@@ -86,6 +89,7 @@ public class CommandLineArgs {
         this.stdin = stdin==null?new InputStreamReader(System.in):stdin;
         this.stdout = stdout==null?new PrintWriter(System.out):stdout;
         this.stderr = stderr==null?new PrintWriter(System.err):stderr;
+        this.scriptReaders = new ArrayList<Reader>();
 
         this.args = new LinkedList<String>(Arrays.asList(args));
 
@@ -104,8 +108,12 @@ public class CommandLineArgs {
             handleNoArgs(true);
             return;
         }
-        if (args.size() > 1)
-            throw new BadArgsException(ErrorType.EXTRA_ARGS, StringUtils.join(args, ' '));
+        while (args.size()>0) {
+            parseOneInputStreamArg();
+        }
+    }
+
+    private void parseOneInputStreamArg() throws BadArgsException {
         String arg = args.remove(0);
 
         if (arg.equals("-")) {
@@ -121,7 +129,7 @@ public class CommandLineArgs {
             if (unzip) {
                 stream = new GZIPInputStream(stream);
             }
-            scriptStream = new InputStreamReader(stream);
+            scriptReaders.add(new InputStreamReader(stream));
         } catch (FileNotFoundException e) {
             throw new BadArgsException(ErrorType.FILE_NOT_FOUND, arg);
         } catch (IOException e) {
@@ -133,10 +141,11 @@ public class CommandLineArgs {
         if (printWarning) {
             String msg = myResources.getString(ErrorType.NO_ARGS.toString());
             stderr.println(msg);
+            stderr.flush();
         }
         if (stopOnError == null)
                 stopOnError = false;
-        scriptStream = stdin;
+        scriptReaders.add(stdin);
         return;
     }
 
@@ -265,8 +274,8 @@ public class CommandLineArgs {
         return res;
     }
 
-    public Reader getScriptStream() {
-        return scriptStream;
+    public Iterable<Reader> getScriptReaders() {
+        return scriptReaders;
     }
 
     public String getDriverClassName() {
