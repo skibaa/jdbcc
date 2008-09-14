@@ -20,7 +20,6 @@ import java.util.regex.Matcher;
 public class Main {
     private CommandLineArgs cla;
     private Connection conn;
-    private PrintWriter stdout;
     private Pattern delimitersPattern;
 
     public Main(CommandLineArgs cla) {
@@ -33,10 +32,15 @@ public class Main {
             cla = new CommandLineArgs(args);
         } catch (
             CommandLineArgs.BadArgsException e) {
-            System.err.println(e.getMessage());
+            cla.getStderr().println(e.getMessage());
             System.exit(1);
         }
-        new Main(cla).run();
+        PrintWriter pw = new PrintWriter(System.out);
+        try {
+            Main m = new Main(cla); m.run();
+        } finally {
+            pw.close();
+        }
     }
 
     public void run() throws Exception {
@@ -44,27 +48,35 @@ public class Main {
         openConnection();
         LineNumberReader lnr = null;
         try {
-            lnr = new LineNumberReader(cla.getScriptStream());
-            String line;
-            StringBuffer sb = new StringBuffer();
-            while ((line=lnr.readLine())!=null) {
-                line.trim();
-                sb.append("\n");
-                sb.append(line);
-                String query;
-
-                while ((query=extractOneQuery(sb)) != null)
-                    executeQuery(query, lnr.getLineNumber());
-
+            for(Reader r: cla.getScriptReaders()) {
+                lnr = executeOneScriptFile(r);
             }
-            if (sb.length() > 0)
-                executeQuery(sb.toString(), lnr.getLineNumber());
         } finally {
             if (lnr != null) {
                 lnr.close();
             }
             conn.close();
         }
+    }
+
+    private LineNumberReader executeOneScriptFile(Reader r) throws IOException, SQLException {
+        LineNumberReader lnr;
+        lnr = new LineNumberReader(r);
+        String line;
+        StringBuffer sb = new StringBuffer();
+        while ((line=lnr.readLine())!=null) {
+            line.trim();
+            sb.append("\n");
+            sb.append(line);
+            String query;
+
+            while ((query=extractOneQuery(sb)) != null)
+                executeQuery(query, lnr.getLineNumber());
+            cla.getStdout().flush();
+        }
+        if (sb.length() > 0)
+            executeQuery(sb.toString(), lnr.getLineNumber());
+        return lnr;
     }
 
     private String extractOneQuery(StringBuffer stringSoFar) {
@@ -119,46 +131,42 @@ public class Main {
                 ResultSet rs = stat.getResultSet();
                 ResultSetMetaData rsMd = rs.getMetaData();
 
-                stdout.print("|");
+                cla.getStdout().print("|");
                 for (int i=1; i<=rsMd.getColumnCount(); i++) {
-                    stdout.print(" ");
-                    stdout.print(rsMd.getColumnName(i));
-                    stdout.print(" |");
+                    cla.getStdout().print(" ");
+                    cla.getStdout().print(rsMd.getColumnName(i));
+                    cla.getStdout().print(" |");
                 }
-                stdout.println("");
+                cla.getStdout().println("");
 
                 int count=0;
                 rs.next();
                 while (!rs.isAfterLast()) {
                     count ++;
-                    stdout.print("|");
+                    cla.getStdout().print("|");
                     for (int i=1; i<=rsMd.getColumnCount(); i++) {
-                        stdout.print(" ");
-                        stdout.print(rs.getObject(i));
-                        stdout.print(" |");
+                        cla.getStdout().print(" ");
+                        cla.getStdout().print(rs.getObject(i));
+                        cla.getStdout().print(" |");
                     }
-                    stdout.println("");
+                    cla.getStdout().println("");
                     rs.next();
                 }
-                stdout.println("Query OK, "+count+" row(s) returned.");
+                cla.getStdout().println("Query OK, "+count+" row(s) returned.");
             } else {
-                stdout.println(String.format("Query OK, %d records updated.", stat.getUpdateCount()));
+                cla.getStdout().println(String.format("Query OK, %d records updated.", stat.getUpdateCount()));
             }
         } catch (SQLException e) {
-            System.err.println("Error " + "near line "+lineNumber+" in query "+s);
+            cla.getStderr().println("Error " + "near line "+lineNumber+" in query "+s);
 
             if (cla.getStopOnError())
                 throw e;
-            else
-                System.err.println(e.getMessage());
+            else {
+                cla.getStderr().println(e.getMessage());
+                cla.getStderr().flush();
+            }
         }
 
-    }
-
-    public void setStdout(PrintWriter stdout) {
-        if (stdout != null)
-            this.stdout = stdout;
-        stdout = new PrintWriter(System.out);
     }
 
     private String joinRegex(Iterable<String> delims) {

@@ -21,5 +21,12 @@
 		  <string>;</string>
 	  </object-array>
 
+	   <object-array>
+		  <string>multiple scripts</string>
+		  <string>-config testdata/test.jdbcc testdata/test.sql testdata/test2.sql</string>
+		  <string></string>
+		  <string>Query OK, 1 records updated.</string>
+	  </object-array>
+
   </a>
 </java.util.Arrays_-ArrayList>

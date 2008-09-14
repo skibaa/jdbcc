@@ -25,6 +25,7 @@ public class MainTest {
     private String sql;
     private String expectedOutputSubstr;
     private StringWriter stdout;
+    private StringWriter stderr;
     private String [] commandLine;
 
     @Parameterized.Parameters
@@ -52,10 +53,10 @@ public class MainTest {
     public void setUp() throws Exception {
         StringReader sr = new StringReader(sql);
         stdout = new StringWriter();
+        stderr = new StringWriter();
 
-        CommandLineArgs cla = new CommandLineArgs(sr, new PrintWriter(stdout), null, commandLine);
+        CommandLineArgs cla = new CommandLineArgs(sr, new PrintWriter(stdout), new PrintWriter(stderr), commandLine);
         Main main = new Main(cla);
-        main.setStdout(new PrintWriter(stdout));
         main.run();
     }
 

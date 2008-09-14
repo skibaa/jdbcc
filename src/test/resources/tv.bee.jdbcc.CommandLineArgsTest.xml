@@ -100,10 +100,8 @@
 
 	  <object-array>
 		  <string>extra arg</string>
-		  <string>file1.sql file2.sql</string>
-		  <tv.bee.jdbcc.CommandLineArgs_-BadArgsException>
-			  <detailMessage><![CDATA[A single file name or '-' for interactive input is expected, got: "file1.sql file2.sql"]]></detailMessage>
-		  </tv.bee.jdbcc.CommandLineArgs_-BadArgsException>
+		  <string>testdata/test.sql testdata/test2.sql</string>
+		  <null/>
 		  <null/>
 		  <null/>
 	  </object-array>
