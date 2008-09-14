@@ -1,4 +1,4 @@
-connection_string=jdbc:h2:test
+connection_url=jdbc:h2:test
 driver_class=org.h2.Driver
 user=sa
 password=

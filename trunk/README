@@ -1,0 +1,124 @@
+JDBCC - the JDBC console
+
+Brief installation and usage guide.
+
+0. For impatient
+
+mvn
+java -jar jdbcc.jar
+java -jar jdbcc.jar -help
+
+Good luck!
+
+1. Installation
+
+It's a pretty standard maven2 project, so make sure maven2 is installed so go ahead with mvn command. It will compile
+and run tests in your environment.
+
+To create a distributive JAR with all major open-source JDBC drivers, they are
+added as dependencies to the pom.xml. If you need only a specific driver, you can comment out the rest. Also you can
+add to the dependencies a proprietary driver like Oracle ojdbc14.jar, but first make sure it's in your local maven
+repository.
+
+As usual with maven2, the outcome of the compilation is in target directory.
+
+It's useful to create a jdbcc.sh (or jdbcc.bat on Windows) in a directory listed on PATH, so instead of
+
+java -jar jdbcc.jar
+
+you will be able to type only jdbcc.
+
+2. Configuration
+
+There are 3 sources of the configuration listed from highest to lowest preference: command line arguments, a
+configuration file referenced by -config command line parameter, and .jdbcc file in user's home directory.
+
+2.1. Command line configuration parameters
+
+-url     connection URL
+    JDBC connection string
+
+-user    username
+    non mandatory parameter - if specified is passed to DriverManager.getConnection
+
+-passwd  password
+    if -user is specified, password can be provided as well, otherwise an empty string is default
+
+-driver  driver class name
+    JDBC driver class name as usual
+
+-config  read settings from file
+    read configuration settings from this file instead of $HOME/.jdbcc
+
+-delim   case insensitive delimiter between SQL commands (one or many)
+    use the specified delimiter(s) instead of default semicolon (;). Please notice, that a) this option unlike others,
+    can be specified more than once, and 2) if you specify a delimiter, the default delimiter is not used, so you might
+    need to specify semicolon explicitely.
+
+Examples:
+
+jdbcc -
+    read settings from $HOME/.jdbcc and enter interactive mode. This minus (-) on command line means that user knows
+    what he is doing and intended to enter interactive mode. When run without parameters, an explanation warning
+    is printed. Please notice that interactive mode provides very basic functionality relative to vendor-provided
+    tools like sqlplus by Oracle.
+
+    By default, error recovery is turned on so application does not exit on the first
+    error, but this can be overriden by -strict command line option.
+
+jdbcc script.sql
+    read settings from $HOME/.jdbcc and execute SQL from file. This is useful when most of the time user uses the
+    same driver and connection URL, so he can configure settings in his $HOME/.jdbcc
+
+    By default, the script execution will be terminated on a first error, but this can be overriden with -recover
+    command line option.
+
+jdbcc -s oracle1.jdbcc script.sql
+    read settings from oracle1.jdbcc and execute SQL from file. This is useful when a few drivers/connection strings
+    are used.
+
+jdbcc -url jdbc:h2:test -user sa -passwd sa -driver org.h2.Driver -recover script.sql
+    use connection settings from comand line, don't stop on errors and execute script.sql. This is useful for ad-hoc
+    connections when it's not worth to create a config file.
+
+jdbcc -delim go -delim run -delim ';' -url jdbc:h2:test -user sa -passwd sa -driver org.h2.Driver -recover script.sql
+    use specified delimiters and connection settings from comand line, don't stop on errors and execute script.sql
+
+2.2. Configuration files.
+
+Configuration parameters can be loaded from a file so they don't have to be specified over and over again on the
+command line. If no configuration file is specified, then .jdbcc file in user home directory is used if present.
+
+Configuration files are actually java property bundles. These are possible property names and the corresponding
+command line parameters:
+
+connection_url     -url
+driver_class       -driver
+password           -passwd
+user               -user
+driver_path        -cp option of JVM
+delimiter          -delim
+
+Most of the properties are used pretty much same as command line options, except the last two.
+
+Driver path is used to load the specified JDBC driver dynamically in addition to the JVM class path. It has no command
+line option counter-part because on command line it's easier to specify driver with java -cp parameter.
+
+Delimiters can be specified a few times on the command line, but when specified in the property file, they have to be
+enumerated like
+
+delimiter.1=;
+delimiter.2=GO
+delimiter.3=/
+
+Examples of configuration files:
+
+# JDBCC configuration for H2 database
+connection_url=jdbc:h2:test
+driver_class=org.h2.Driver
+user=sa
+password=
+delimiter.1=;
+delimiter.2=GO
+
+More examples to come ;-)

@@ -25,6 +25,7 @@ public class MainTest {
     private String sql;
     private String expectedOutputSubstr;
     private StringWriter stdout;
+    private String [] commandLine;
 
     @Parameterized.Parameters
     public static Collection data() {
@@ -34,14 +35,15 @@ public class MainTest {
         try {
             is.close();
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
         return c;
     }
 
-    public MainTest (String testName, String sql, String expectedOutputSubstr) {
+    public MainTest (String testName, String commandLine, String sql, String expectedOutputSubstr) {
 
         this.testName = testName;
+        this.commandLine = commandLine.split(" ");
         this.sql = sql;
         this.expectedOutputSubstr = expectedOutputSubstr;
     }
@@ -51,7 +53,7 @@ public class MainTest {
         StringReader sr = new StringReader(sql);
         stdout = new StringWriter();
 
-        CommandLineArgs cla = new CommandLineArgs(sr, new PrintWriter(stdout), null, "-config", "testdata/test.jdbcc", "-");
+        CommandLineArgs cla = new CommandLineArgs(sr, new PrintWriter(stdout), null, commandLine);
         Main main = new Main(cla);
         main.setStdout(new PrintWriter(stdout));
         main.run();

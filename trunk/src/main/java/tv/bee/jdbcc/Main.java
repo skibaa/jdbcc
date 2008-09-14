@@ -8,6 +8,8 @@ import java.net.MalformedURLException;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 /* 
  * Main class for jdbcc application
@@ -16,28 +18,13 @@ import java.lang.reflect.Method;
  */
 
 public class Main {
-    private Reader scriptReader;
-    private String driverClassName;
-    private String connectionString;
+    private CommandLineArgs cla;
     private Connection conn;
-    private String user;
-    private String password;
-    private boolean stopOnError;
-    private String driverPath;
     private PrintWriter stdout;
-
-    public Main(String scriptFileName, String driverClassName, String connectionString, String user, String password) {
-
-    }
+    private Pattern delimitersPattern;
 
     public Main(CommandLineArgs cla) {
-        this.scriptReader = cla.getScriptStream();
-        this.driverClassName = cla.getDriverClassName();
-        this.connectionString = cla.getConnectionString();
-        this.user = cla.getUser();
-        this.password = cla.getPassword();
-        this.stopOnError = cla.getStopOnError();
-        this.driverPath = cla.getDriverPath();
+        this.cla = cla;
     }
 
     static public void main(String [] args) throws Exception {
@@ -57,23 +44,18 @@ public class Main {
         openConnection();
         LineNumberReader lnr = null;
         try {
-            lnr = new LineNumberReader(scriptReader);
+            lnr = new LineNumberReader(cla.getScriptStream());
             String line;
             StringBuffer sb = new StringBuffer();
             while ((line=lnr.readLine())!=null) {
                 line.trim();
                 sb.append("\n");
                 sb.append(line);
-                String stringSoFar = sb.toString();
-                if (!stringSoFar.contains(";")) {
-                    continue;
-                }
+                String query;
 
-                int semicolonIdx = stringSoFar.indexOf(';');
+                while ((query=extractOneQuery(sb)) != null)
+                    executeQuery(query, lnr.getLineNumber());
 
-                executeQuery(stringSoFar.substring(0, semicolonIdx), lnr.getLineNumber());
-                sb.setLength(0);
-                sb.append(stringSoFar.substring(semicolonIdx+1));
             }
             if (sb.length() > 0)
                 executeQuery(sb.toString(), lnr.getLineNumber());
@@ -85,16 +67,25 @@ public class Main {
         }
     }
 
+    private String extractOneQuery(StringBuffer stringSoFar) {
+        String [] parts = getDelimitersPattern().split(stringSoFar, 2);
+        if (parts.length < 2)
+            return null;
+        stringSoFar.setLength(0);
+        stringSoFar.append(parts[1]);
+        return parts[0];
+    }
+
     private void openConnection() throws ClassNotFoundException, SQLException, MalformedURLException, IllegalAccessException, InstantiationException, FileNotFoundException {
-        if (driverPath != null) {
-            File driverFile = new File(driverPath);
+        if (cla.getDriverPath() != null) {
+            File driverFile = new File(cla.getDriverPath());
             if (!driverFile.exists())
-                throw new FileNotFoundException(driverPath);
+                throw new FileNotFoundException(cla.getDriverPath());
             ClassLoader cl = new URLClassLoader(new URL [] {
                     new URL("file://"+driverFile.getAbsolutePath())
             });
 
-            final Class dc = Class.forName(driverClassName, true, cl);
+            final Class dc = Class.forName(cla.getDriverClassName(), true, cl);
             final Driver d = (Driver)dc.newInstance();
 
             Driver proxy = (Driver)Proxy.newProxyInstance(getClass().getClassLoader(),
@@ -109,14 +100,14 @@ public class Main {
             DriverManager.registerDriver(proxy);
         }
         else {
-            getClass().forName(driverClassName);
+            getClass().forName(cla.getDriverClassName());
         }
 
-        if (user != null) {
-            this.conn = DriverManager.getConnection(connectionString, user, password);
+        if (cla.getUser() != null) {
+            this.conn = DriverManager.getConnection(cla.getConnectionString(), cla.getUser(), cla.getPassword());
         }
         else {
-            this.conn = DriverManager.getConnection(connectionString);
+            this.conn = DriverManager.getConnection(cla.getConnectionString());
         }
     }
 
@@ -156,7 +147,7 @@ public class Main {
         } catch (SQLException e) {
             System.err.println("Error " + "near line "+lineNumber+" in query "+s);
 
-            if (stopOnError)
+            if (cla.getStopOnError())
                 throw e;
             else
                 System.err.println(e.getMessage());
@@ -168,5 +159,32 @@ public class Main {
         if (stdout != null)
             this.stdout = stdout;
         stdout = new PrintWriter(System.out);
+    }
+
+    private String joinRegex(Iterable<String> delims) {
+        StringBuilder sb = new StringBuilder("");
+        boolean isFirst=true;
+
+        for(String delim : delims) {
+            if (!isFirst)
+                sb.append("|");
+            isFirst = false;
+            sb.append("(");
+            if (Character.isLetterOrDigit(delim.charAt(0)))
+                sb.append("\\W");//if delimiter starts from letter, a non-letter character must preceede
+            sb.append(delim);
+            if (Character.isLetterOrDigit(delim.charAt(delim.length()-1)))
+                sb.append("\\W");//if delimiter ends on letter, a non-letter character must follow
+            sb.append(")");
+        }
+        return sb.toString();
+    }
+
+    public Pattern getDelimitersPattern() {
+        if (delimitersPattern != null)
+            return delimitersPattern;
+
+        delimitersPattern = Pattern.compile(joinRegex(cla.getDelimiters()), Pattern.CASE_INSENSITIVE);
+        return delimitersPattern;
     }
 }
