@@ -12,7 +12,7 @@ import java.util.zip.GZIPInputStream;
  * Author Andrew Skiba <andrew@tikalk.com>
  */
 
-public class CommandLineArgs implements ParsedCommandLine {
+public class CommandLineArgs {
     String connectionString;
     String driverClassName;
     String password;
@@ -23,17 +23,29 @@ public class CommandLineArgs implements ParsedCommandLine {
     private Reader stdin;
     private PrintWriter stdout;
     private PrintWriter stderr;
+    private List<String> delimiters = new ArrayList<String>();
 
     public String getDriverPath() {
         return driverPath;
     }
 
+    public PrintWriter getStdout() {
+        return stdout;
+    }
+
+    public Iterable<String> getDelimiters() {
+        if (delimiters.size() == 0)
+            delimiters.add(";");
+        return delimiters;
+    }
+
     enum ConfigProperties {
-        CONNECTION_STRING("connection_string"),
+        CONNECTION_STRING("connection_url"),
         DRIVER_CLASS("driver_class"),
         PASSWORD("password"),
         USER("user"),
-        DRIVER_PATH("driver_path");
+        DRIVER_PATH("driver_path"),
+        DELIMITERS("delimiter");
 
         String name;
         ConfigProperties (String name) {this.name=name;}
@@ -189,6 +201,11 @@ public class CommandLineArgs implements ParsedCommandLine {
             i.remove();
             this.unzip = true;
         }
+        else if (arg.equals("-delim")) {
+            i.remove();
+            delimiters.add(i.next());
+            i.remove();
+        }
         else if (arg.equals("-help")) {
             throw new BadArgsException(ErrorType.HELP);
         }
@@ -220,6 +237,21 @@ public class CommandLineArgs implements ParsedCommandLine {
         this.driverPath = readConfigProperty(props, fileName, ConfigProperties.DRIVER_PATH, false);
         this.user = readConfigProperty(props, fileName, ConfigProperties.USER, false);
         this.password = readConfigProperty(props, fileName, ConfigProperties.PASSWORD, false);
+        this.delimiters = readConfigPropertyArray(props, fileName, ConfigProperties.DELIMITERS);
+    }
+
+    private List<String> readConfigPropertyArray(Properties props, String fileName, ConfigProperties configProperty) {
+        int i=0;
+        String value;
+        ArrayList<String> res=new ArrayList<String>();
+        while(true) {
+            i++;
+            value = props.getProperty(configProperty.getName()+"."+i);
+            if (value == null)
+                break;
+            res.add(value);
+        }
+        return res;
     }
 
     private String readConfigProperty(Properties props, String fileName, ConfigProperties configProperty,

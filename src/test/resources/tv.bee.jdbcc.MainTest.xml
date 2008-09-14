@@ -3,8 +3,22 @@
 
 	  <object-array>
 		  <string>simple sql</string>
-		  <string>create table if not exists testTable(testField number);</string>
+		  <string>-config testdata/test.jdbcc -</string>
+		  <string>create table if not exists testTable(testField varchar(20));</string>
 		  <string>OK</string>
+	  </object-array>
+
+	  <object-array>
+		  <string>custom delimiter</string>
+		  <string>-config testdata/test.jdbcc -delim GO -delim TEST</string>
+		  <string><![CDATA[create table if not exists testTable(testField varchar(20))
+		  go
+		  insert into testTable (testField) values (';')
+		  gO
+		  select * from testTable
+		  TEST
+		  ]]></string>
+		  <string>;</string>
 	  </object-array>
 
   </a>
