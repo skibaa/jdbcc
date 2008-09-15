@@ -23,16 +23,10 @@
 
 	  <object-array>
 		  <string>custom remarks</string>
-		  <string>-config testdata/test.jdbcc -rem --.*$ -rem ^REM.*$ -rem \/\*.*\*\/</string>
-		  <string><![CDATA[create table if not exists testTable(testField varchar(20)); -- comment through EOL
+		  <string>-config testdata/test.jdbcc -rem --.* -rem ^REM.* -rem \/\*[.\s]*\*\/</string>
+		  <string><![CDATA[create table if not exists testTable(testField varchar(20));
 		  rem comment whole line
-		  insert into testTable (testField) values ('kuku');
-		  /*
-		  few
-		  lines
-		  of
-		  BS
-		  */
+		  insert into testTable (testField) values ('kuku'); -- comment through EOL
 		  select * from testTable;
 		  ]]></string>
 		  <string>kuku</string>

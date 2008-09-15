@@ -54,11 +54,12 @@ configuration file referenced by -config command line parameter, and .jdbcc file
 
 -rem     remark customization
 
-    For -delim and -rem are used java.util.regex.Pattern regular expressions with CASE_INSENSITIVE and MULTILINE flags.
-    If no -delim is given, the default is semicolon (;) and if no -rem is given the default is --.*$ meaning comment
-    from -- trough the end of line. Please notice, that these option unlike others, can be specified more than once.
-    When a textual delimiter such as 'GO' for T-SQL is used, it's safer to surround it with \b like this: \bGO\b. It
-    means GO must have a word boundary before and after.
+    For -delim and -rem use java.util.regex.Pattern regular expressions They are compiled with CASE_INSENSITIVE and
+    MULTILINE flags. If no -delim is given, the default is semicolon (;) and if no -rem is given the default is
+    --.*$ meaning comment from -- trough the end of line. Please notice, that these option unlike others, can be
+    specified more than once. When a textual delimiter such as 'GO' for T-SQL is used, it's safer to surround it with
+    \b like this: \bGO\b. It means GO must have a word boundary before and after. Multiline comments may interfere with
+    command delimiters and are not recommended.
 
 Examples:
 

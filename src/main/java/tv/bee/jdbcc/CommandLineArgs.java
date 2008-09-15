@@ -44,7 +44,7 @@ public class CommandLineArgs {
 
     public Iterable<String> getRemarks() {
         if (remarks.size() == 0)
-            remarks.add("--.*$");
+            remarks.add("--.*");
         return remarks;
     }
 
