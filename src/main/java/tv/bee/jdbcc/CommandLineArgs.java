@@ -24,6 +24,7 @@ public class CommandLineArgs {
     private PrintWriter stdout;
     private PrintWriter stderr;
     private List<String> delimiters = new ArrayList<String>();
+    private List<String> remarks = new ArrayList<String>();
     private List<Reader> scriptReaders;
     private List<String> args;
 
@@ -41,6 +42,12 @@ public class CommandLineArgs {
         return delimiters;
     }
 
+    public Iterable<String> getRemarks() {
+        if (remarks.size() == 0)
+            remarks.add("--.*$");
+        return remarks;
+    }
+
     public PrintWriter getStderr() {
         return stderr;
     }
@@ -51,7 +58,8 @@ public class CommandLineArgs {
         PASSWORD("password"),
         USER("user"),
         DRIVER_PATH("driver_path"),
-        DELIMITERS("delimiter");
+        DELIMITERS("delimiter"),
+        REMARKS("remark");
 
         String name;
         ConfigProperties (String name) {this.name=name;}
@@ -215,6 +223,11 @@ public class CommandLineArgs {
             delimiters.add(i.next());
             i.remove();
         }
+        else if (arg.equals("-rem")) {
+            i.remove();
+            remarks.add(i.next());
+            i.remove();
+        }
         else if (arg.equals("-help")) {
             throw new BadArgsException(ErrorType.HELP);
         }
@@ -247,6 +260,7 @@ public class CommandLineArgs {
         this.user = readConfigProperty(props, fileName, ConfigProperties.USER, false);
         this.password = readConfigProperty(props, fileName, ConfigProperties.PASSWORD, false);
         this.delimiters = readConfigPropertyArray(props, fileName, ConfigProperties.DELIMITERS);
+        this.remarks = readConfigPropertyArray(props, fileName, ConfigProperties.REMARKS);
     }
 
     private List<String> readConfigPropertyArray(Properties props, String fileName, ConfigProperties configProperty) {

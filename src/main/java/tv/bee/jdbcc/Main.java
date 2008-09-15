@@ -10,6 +10,8 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.ArrayList;
+import java.util.List;
 
 /* 
  * Main class for jdbcc application
@@ -21,6 +23,7 @@ public class Main {
     private CommandLineArgs cla;
     private Connection conn;
     private Pattern delimitersPattern;
+    private List<Pattern> remarks;
 
     public Main(CommandLineArgs cla) {
         this.cla = cla;
@@ -64,7 +67,6 @@ public class Main {
         String line;
         StringBuffer sb = new StringBuffer();
         while ((line=lnr.readLine())!=null) {
-            line.trim();
             sb.append("\n");
             sb.append(line);
             String query;
@@ -123,6 +125,7 @@ public class Main {
     }
 
     private void executeQuery(String s, int lineNumber) throws SQLException {
+        s = removeRemarks(s);
         if (s.trim().length()==0)
             return;
         try {
@@ -170,6 +173,16 @@ public class Main {
 
     }
 
+    private String removeRemarks(String s) {
+        for (Pattern remark: getRemarks()) {
+            Matcher m = remark.matcher(s);
+            s = m.replaceAll("").trim(); // replace remark with empty string
+            if (s.length() == 0)
+                break;
+        }
+        return s;
+    }
+
     private String joinRegex(Iterable<String> delims) {
         StringBuilder sb = new StringBuilder("");
         boolean isFirst=true;
@@ -179,11 +192,7 @@ public class Main {
                 sb.append("|");
             isFirst = false;
             sb.append("(");
-            if (Character.isLetterOrDigit(delim.charAt(0)))
-                sb.append("\\W");//if delimiter starts from letter, a non-letter character must preceede
             sb.append(delim);
-            if (Character.isLetterOrDigit(delim.charAt(delim.length()-1)))
-                sb.append("\\W");//if delimiter ends on letter, a non-letter character must follow
             sb.append(")");
         }
         return sb.toString();
@@ -193,7 +202,17 @@ public class Main {
         if (delimitersPattern != null)
             return delimitersPattern;
 
-        delimitersPattern = Pattern.compile(joinRegex(cla.getDelimiters()), Pattern.CASE_INSENSITIVE);
+        delimitersPattern = Pattern.compile(joinRegex(cla.getDelimiters()), Pattern.CASE_INSENSITIVE|Pattern.MULTILINE);
         return delimitersPattern;
+    }
+
+    public Iterable<Pattern> getRemarks() {
+        if (remarks != null)
+            return remarks;
+        remarks = new ArrayList<Pattern>();
+        for (String remark: cla.getRemarks()) {
+            remarks.add(Pattern.compile(remark, Pattern.CASE_INSENSITIVE|Pattern.MULTILINE));
+        }
+        return remarks;
     }
 }

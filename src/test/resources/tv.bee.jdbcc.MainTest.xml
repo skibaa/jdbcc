@@ -10,7 +10,7 @@
 
 	  <object-array>
 		  <string>custom delimiter</string>
-		  <string>-config testdata/test.jdbcc -delim GO -delim TEST</string>
+		  <string>-config testdata/test.jdbcc -delim GO -delim \bTEST\b</string>
 		  <string><![CDATA[create table if not exists testTable(testField varchar(20))
 		  go
 		  insert into testTable (testField) values (';')
@@ -19,6 +19,23 @@
 		  TEST
 		  ]]></string>
 		  <string>;</string>
+	  </object-array>
+
+	  <object-array>
+		  <string>custom remarks</string>
+		  <string>-config testdata/test.jdbcc -rem --.*$ -rem ^REM.*$ -rem \/\*.*\*\/</string>
+		  <string><![CDATA[create table if not exists testTable(testField varchar(20)); -- comment through EOL
+		  rem comment whole line
+		  insert into testTable (testField) values ('kuku');
+		  /*
+		  few
+		  lines
+		  of
+		  BS
+		  */
+		  select * from testTable;
+		  ]]></string>
+		  <string>kuku</string>
 	  </object-array>
 
 	   <object-array>
