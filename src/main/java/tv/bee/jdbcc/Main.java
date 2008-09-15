@@ -30,9 +30,8 @@ public class Main {
         CommandLineArgs cla=null;
         try {
             cla = new CommandLineArgs(args);
-        } catch (
-            CommandLineArgs.BadArgsException e) {
-            cla.getStderr().println(e.getMessage());
+        } catch (CommandLineArgs.BadArgsException e) {
+            System.err.println(e.getMessage());
             System.exit(1);
         }
         PrintWriter pw = new PrintWriter(System.out);
@@ -124,6 +123,8 @@ public class Main {
     }
 
     private void executeQuery(String s, int lineNumber) throws SQLException {
+        if (s.trim().length()==0)
+            return;
         try {
             Statement stat = conn.createStatement();
             boolean hasRes = stat.execute(s);
@@ -158,7 +159,7 @@ public class Main {
             }
         } catch (SQLException e) {
             cla.getStderr().println("Error " + "near line "+lineNumber+" in query "+s);
-
+            cla.getStderr().flush();
             if (cla.getStopOnError())
                 throw e;
             else {
