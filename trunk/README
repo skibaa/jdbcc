@@ -50,10 +50,15 @@ configuration file referenced by -config command line parameter, and .jdbcc file
 -config  read settings from file
     read configuration settings from this file instead of $HOME/.jdbcc
 
--delim   case insensitive delimiter between SQL commands (one or many)
-    use the specified delimiter(s) instead of default semicolon (;). Please notice, that a) this option unlike others,
-    can be specified more than once, and 2) if you specify a delimiter, the default delimiter is not used, so you might
-    need to specify semicolon explicitely.
+-delim   delimiter between SQL commands
+
+-rem     remark customization
+
+    For -delim and -rem are used java.util.regex.Pattern regular expressions with CASE_INSENSITIVE and MULTILINE flags.
+    If no -delim is given, the default is semicolon (;) and if no -rem is given the default is --.*$ meaning comment
+    from -- trough the end of line. Please notice, that these option unlike others, can be specified more than once.
+    When a textual delimiter such as 'GO' for T-SQL is used, it's safer to surround it with \b like this: \bGO\b. It
+    means GO must have a word boundary before and after.
 
 Examples:
 
@@ -98,6 +103,7 @@ password           -passwd
 user               -user
 driver_path        -cp option of JVM
 delimiter          -delim
+remark_start       -rem
 
 Most of the properties are used pretty much same as command line options, except the last two.
 
@@ -108,7 +114,7 @@ Delimiters can be specified a few times on the command line, but when specified 
 enumerated like
 
 delimiter.1=;
-delimiter.2=GO
+delimiter.2=\WGO\W
 delimiter.3=/
 
 Examples of configuration files:
@@ -120,5 +126,8 @@ user=sa
 password=
 delimiter.1=;
 delimiter.2=GO
+remark.1=--.*
+remark.2=^REM.*
+remark.3=\/\*.*\*\/
 
 More examples to come ;-)
