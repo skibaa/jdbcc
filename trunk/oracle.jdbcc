@@ -1,0 +1,10 @@
+connection_url=jdbc:oracle:thin:@<host>:1521:<db>
+driver_class=oracle.jdbc.driver.OracleDriver
+driver_path=<path>
+user=<user>
+password=<password>
+delimiter.1=;
+delimiter.2=/
+remark.1=^REM.*
+remark.2=^SET.*
+remark.3=--.*
