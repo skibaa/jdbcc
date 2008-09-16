@@ -23,10 +23,13 @@ public class CommandLineArgs {
     private Reader stdin;
     private PrintWriter stdout;
     private PrintWriter stderr;
+    private boolean isInteractive=false;
     private List<String> delimiters = new ArrayList<String>();
     private List<String> remarks = new ArrayList<String>();
     private List<Reader> scriptReaders;
     private List<String> args;
+    private boolean isVerbose=false;
+    private boolean isQuiet=false;
 
     public String getDriverPath() {
         return driverPath;
@@ -50,6 +53,18 @@ public class CommandLineArgs {
 
     public PrintWriter getStderr() {
         return stderr;
+    }
+
+    public boolean isInteractive() {
+        return isInteractive;
+    }
+
+    public boolean isVerbose() {
+        return isVerbose;
+    }
+
+    public boolean isQuiet() {
+        return isQuiet;
     }
 
     enum ConfigProperties {
@@ -113,19 +128,17 @@ public class CommandLineArgs {
 
     private void parseInputStreamArgs() throws BadArgsException {
         if (args.size() == 0) {
-            handleNoArgs(true);
+            enterInteractiveMode(true);
             return;
         }
         while (args.size()>0) {
-            parseOneInputStreamArg();
+            parseOneInputStreamArg(args.remove(0));
         }
     }
 
-    private void parseOneInputStreamArg() throws BadArgsException {
-        String arg = args.remove(0);
-
+    private void parseOneInputStreamArg(String arg) throws BadArgsException {
         if (arg.equals("-")) {
-            handleNoArgs(false);
+            enterInteractiveMode(false);
             return;
         }
 
@@ -145,7 +158,8 @@ public class CommandLineArgs {
         }
     }
 
-    private void handleNoArgs(boolean printWarning) {
+    private void enterInteractiveMode(boolean printWarning) {
+        isInteractive = true;
         if (printWarning) {
             String msg = myResources.getString(ErrorType.NO_ARGS.toString());
             stderr.println(msg);
@@ -204,6 +218,16 @@ public class CommandLineArgs {
             driverClassName = i.next();
             i.remove();
         }
+        else if (arg.equals("-list")) {
+            i.remove();
+            readFileList(i.next());
+            i.remove();
+        }
+        else if (arg.equals("-verbose")) {
+            i.remove();
+            isInteractive = true;
+            isVerbose = true;
+        }
         else if (arg.equals("-user")) {
             i.remove();
             user = i.next();
@@ -233,6 +257,35 @@ public class CommandLineArgs {
         }
         else {
             throw new BadArgsException(ErrorType.BAD_ARG, arg);
+        }
+    }
+
+    private void readFileList(String fileName) throws BadArgsException {
+        File file = new File(fileName);
+        FileInputStream fis;
+        try {
+           fis = new FileInputStream(file);
+        } catch (IOException e) {
+            throw new BadArgsException(ErrorType.FILE_NOT_FOUND, fileName);
+        }
+        LineNumberReader lnr=null;
+        try {
+            lnr = new LineNumberReader(new InputStreamReader(fis));
+            String line;
+            while ((line=lnr.readLine())!=null) {
+                String path = line.trim();
+                String absolutePath = new File(file.getParentFile(), path).getAbsolutePath();
+                parseOneInputStreamArg(absolutePath);
+            }
+        } catch (IOException e) {
+                    throw new BadArgsException(ErrorType.IO_ERROR, fileName);
+        }finally {
+            if (lnr != null)
+                try {
+                    lnr.close();
+                } catch (IOException e) {
+                    throw new BadArgsException(ErrorType.IO_ERROR, fileName);
+                }
         }
     }
 
