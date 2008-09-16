@@ -127,7 +127,7 @@ public class CommandLineArgs {
     }
 
     private void parseInputStreamArgs() throws BadArgsException {
-        if (args.size() == 0) {
+        if (args.size() == 0 && scriptReaders.size() == 0) {
             enterInteractiveMode(true);
             return;
         }
