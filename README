@@ -28,12 +28,28 @@ java -jar jdbcc.jar
 
 you will be able to type only jdbcc.
 
-2. Configuration
+2. Command line options
+
+There are 2 kinds of options: configuration options and on/off options. The configuration options see 3.Configuration.
+This is the list of on/off options:
+
+-help    print a short help message and exit.
+
+-recover report errors and continue (default in interactive mode). This option is an opposite of -strict.
+
+-strict  report the first error and exit (default in non-interactive mode). This option is an opposite of -recover.
+
+-verbose print the SQL and the result of the execution in non-interactive mode. By default in non-interactive mode only
+         the count of completed queries is printed every second.
+
+-quiet   don't print anything at all during non-interactive execution.
+
+3. Configuration
 
 There are 3 sources of the configuration listed from highest to lowest preference: command line arguments, a
 configuration file referenced by -config command line parameter, and .jdbcc file in user's home directory.
 
-2.1. Command line configuration parameters
+3.1. Command line configuration parameters
 
 -url     connection URL
     JDBC connection string
@@ -51,6 +67,9 @@ configuration file referenced by -config command line parameter, and .jdbcc file
     read configuration settings from this file instead of $HOME/.jdbcc
 
 -delim   delimiter between SQL commands
+
+-list    read the list of SQL scripts from the specified file, one file name in a line. Pathes are relative to the
+         location of the list file.
 
 -rem     remark customization
 
@@ -90,7 +109,7 @@ jdbcc -url jdbc:h2:test -user sa -passwd sa -driver org.h2.Driver -recover scrip
 jdbcc -delim go -delim run -delim ';' -url jdbc:h2:test -user sa -passwd sa -driver org.h2.Driver -recover script.sql
     use specified delimiters and connection settings from comand line, don't stop on errors and execute script.sql
 
-2.2. Configuration files.
+3.2. Configuration files.
 
 Configuration parameters can be loaded from a file so they don't have to be specified over and over again on the
 command line. If no configuration file is specified, then .jdbcc file in user home directory is used if present.

@@ -24,6 +24,10 @@ public class Main {
     private Connection conn;
     private Pattern delimitersPattern;
     private List<Pattern> remarks;
+    ArrayList<Integer> quotesPos;
+    Pattern quote = Pattern.compile("'");
+    long queriesComplete=0;
+    long lastCompleteReportedClock=0;
 
     public Main(CommandLineArgs cla) {
         this.cla = cla;
@@ -67,6 +71,7 @@ public class Main {
         String line;
         StringBuffer sb = new StringBuffer();
         while ((line=lnr.readLine())!=null) {
+
             sb.append("\n");
             sb.append(line);
             String query;
@@ -81,12 +86,29 @@ public class Main {
     }
 
     private String extractOneQuery(StringBuffer stringSoFar) {
-        String [] parts = getDelimitersPattern().split(stringSoFar, 2);
-        if (parts.length < 2)
+        String [] parts = quote.split(stringSoFar);
+        int partOffset=0;
+        int start=-1;
+        int end=-1;
+
+        for (int i=0; i<parts.length; i+=2) {
+            if (i>0)
+                partOffset += parts[i-1].length()+quote.pattern().length(); //FIXME: will not work with complex patterns
+            Matcher msemicolon = getDelimitersPattern().matcher(parts[i]);
+            if (msemicolon.find()) {
+                start=partOffset+msemicolon.start();
+                end=partOffset+msemicolon.end();
+                break;
+            }
+            partOffset += parts[i].length()+quote.pattern().length(); //FIXME: will not work with complex patterns
+        }
+        if (start==-1)
             return null;
+        String nextQuery = stringSoFar.substring(end);
+        String thisQuery = stringSoFar.substring(0, start);
         stringSoFar.setLength(0);
-        stringSoFar.append(parts[1]);
-        return parts[0];
+        stringSoFar.append(nextQuery);
+        return thisQuery;
     }
 
     private void openConnection() throws ClassNotFoundException, SQLException, MalformedURLException, IllegalAccessException, InstantiationException, FileNotFoundException {
@@ -128,35 +150,54 @@ public class Main {
         s = removeRemarks(s);
         if (s.trim().length()==0)
             return;
+        Statement stat=null;
         try {
-            Statement stat = conn.createStatement();
+            stat = conn.createStatement();
+            if (cla.isVerbose()) {
+                cla.getStdout().println(s);
+            }
             boolean hasRes = stat.execute(s);
+            queriesComplete ++;
+            if (!cla.isInteractive()) {
+                if (!cla.isQuiet()) {
+                    long newClock = System.nanoTime();
+                    if (newClock - lastCompleteReportedClock > 1000000000L) {
+                        lastCompleteReportedClock = newClock;
+                        cla.getStdout().print("Queries complete: "+queriesComplete+"\r");
+                    }
+                }
+                return;
+            }
             if (hasRes) {
                 ResultSet rs = stat.getResultSet();
-                ResultSetMetaData rsMd = rs.getMetaData();
+                try {
+                    ResultSetMetaData rsMd = rs.getMetaData();
 
-                cla.getStdout().print("|");
-                for (int i=1; i<=rsMd.getColumnCount(); i++) {
-                    cla.getStdout().print(" ");
-                    cla.getStdout().print(rsMd.getColumnName(i));
-                    cla.getStdout().print(" |");
-                }
-                cla.getStdout().println("");
-
-                int count=0;
-                rs.next();
-                while (!rs.isAfterLast()) {
-                    count ++;
                     cla.getStdout().print("|");
                     for (int i=1; i<=rsMd.getColumnCount(); i++) {
                         cla.getStdout().print(" ");
-                        cla.getStdout().print(rs.getObject(i));
+                        cla.getStdout().print(rsMd.getColumnName(i));
                         cla.getStdout().print(" |");
                     }
                     cla.getStdout().println("");
+
+                    int count=0;
                     rs.next();
+                    while (!rs.isAfterLast()) {
+                        count ++;
+                        cla.getStdout().print("|");
+                        for (int i=1; i<=rsMd.getColumnCount(); i++) {
+                            cla.getStdout().print(" ");
+                            cla.getStdout().print(rs.getObject(i));
+                            cla.getStdout().print(" |");
+                        }
+                        cla.getStdout().println("");
+                        rs.next();
+                    }
+                    cla.getStdout().println("Query OK, "+count+" row(s) returned.");
+                } finally {
+                    rs.close();
                 }
-                cla.getStdout().println("Query OK, "+count+" row(s) returned.");
             } else {
                 cla.getStdout().println(String.format("Query OK, %d records updated.", stat.getUpdateCount()));
             }
@@ -169,6 +210,9 @@ public class Main {
                 cla.getStderr().println(e.getMessage());
                 cla.getStderr().flush();
             }
+        } finally {
+            if (stat != null)
+                stat.close();
         }
 
     }

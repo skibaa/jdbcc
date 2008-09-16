@@ -9,10 +9,21 @@
 	  </object-array>
 
 	  <object-array>
+		  <string>delim in string</string>
+		  <string>-config testdata/test.jdbcc -</string>
+		  <string>
+			  create table if not exists testTable(testField varchar(20));
+			  insert into testTable (testField) values (';');
+		  </string>
+		  <string>1 records</string>
+	  </object-array>
+
+	  <object-array>
 		  <string>custom delimiter</string>
 		  <string>-config testdata/test.jdbcc -delim GO -delim \bTEST\b</string>
 		  <string><![CDATA[create table if not exists testTable(testField varchar(20))
 		  go
+		  delete from testTable go
 		  insert into testTable (testField) values (';')
 		  gO
 		  select * from testTable
@@ -34,10 +45,17 @@
 
 	   <object-array>
 		  <string>multiple scripts</string>
-		  <string>-config testdata/test.jdbcc testdata/test.sql testdata/test2.sql</string>
+		  <string>-config testdata/test.jdbcc -verbose testdata/test.sql testdata/test2.sql</string>
 		  <string></string>
 		  <string>Query OK, 1 records updated.</string>
 	  </object-array>
+
+	  <object-array>
+		 <string>file list</string>
+		 <string>-config testdata/test.jdbcc -verbose -list testdata/test.list</string>
+		 <string></string>
+		 <string>Query OK, 1 records updated.</string>
+	 </object-array>
 
   </a>
 </java.util.Arrays_-ArrayList>
