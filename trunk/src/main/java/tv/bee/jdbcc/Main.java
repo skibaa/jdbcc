@@ -116,9 +116,7 @@ public class Main {
             File driverFile = new File(cla.getDriverPath());
             if (!driverFile.exists())
                 throw new FileNotFoundException(cla.getDriverPath());
-            ClassLoader cl = new URLClassLoader(new URL [] {
-                    new URL("file://"+driverFile.getAbsolutePath())
-            });
+            ClassLoader cl = new URLClassLoader(new URL [] { driverFile.toURI().toURL() });
 
             final Class dc = Class.forName(cla.getDriverClassName(), true, cl);
             final Driver d = (Driver)dc.newInstance();
