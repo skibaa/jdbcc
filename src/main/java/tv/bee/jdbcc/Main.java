@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /* 
  * Main class for jdbcc application
@@ -34,6 +35,9 @@ public class Main {
     }
 
     static public void main(String [] args) throws Exception {
+        //TODO: get rid of this but find a way Oracle days are English on non-English machines
+        Locale.setDefault(Locale.US);
+
         CommandLineArgs cla=null;
         try {
             cla = new CommandLineArgs(args);
@@ -57,6 +61,8 @@ public class Main {
             for(Reader r: cla.getScriptReaders()) {
                 lnr = executeOneScriptFile(r);
             }
+            if (!cla.isInteractive())
+                cla.getStdout().println();
         } finally {
             if (lnr != null) {
                 lnr.close();
