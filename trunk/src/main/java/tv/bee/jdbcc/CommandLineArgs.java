@@ -24,7 +24,9 @@ public class CommandLineArgs {
     private PrintWriter stdout;
     private PrintWriter stderr;
     private boolean isInteractive=false;
+    private boolean hasCliDelimiters=false;
     private List<String> delimiters = new ArrayList<String>();
+    private boolean hasCliRemarks=false;
     private List<String> remarks = new ArrayList<String>();
     private List<Reader> scriptReaders;
     private List<String> args;
@@ -244,11 +246,19 @@ public class CommandLineArgs {
         }
         else if (arg.equals("-delim")) {
             i.remove();
+            if (!hasCliDelimiters) {
+                hasCliDelimiters = true;
+                delimiters.clear();
+            }
             delimiters.add(i.next());
             i.remove();
         }
         else if (arg.equals("-rem")) {
             i.remove();
+            if (!hasCliRemarks) {
+                hasCliRemarks = true;
+                remarks.clear();
+            }
             remarks.add(i.next());
             i.remove();
         }
