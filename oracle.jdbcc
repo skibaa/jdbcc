@@ -7,4 +7,4 @@ delimiter.1=;
 delimiter.2=/
 remark.1=^REM.*
 remark.2=^SET.*
-remark.3=--.*
+remark.3=^--.*
