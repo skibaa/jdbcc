@@ -1,0 +1,3 @@
+Enables running SQL scripts in automatic or manual mode. Can be used in agile development during automatic build or test, and as a database terminal console. It works with any database having JDBC driver.
+
+Suppronts MySQL, PostgreSQL, Derby, HSQL and H2 out of the box. It also supports DB2, MS SQL and Oracle after downloading appropriate proprietary driver. These drivers are available for free but as they are not open source I can not include them in the bundle.
